@@ -2,27 +2,21 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'feature1', url: 'https://github.com/arijit0405/jenkins.git'
             }
         }
 
-        stage('Set Up Python') {
-            steps {
-                bat 'python --version'
-            }
-        }
-
-        stage('Run Application') {
+        stage('Run App') {
             steps {
                 bat 'python app.py'
             }
         }
 
-        stage('Run Unit Tests') {
+        stage('Run Tests') {
             steps {
-                bat 'python test_app.py'
+                bat 'pytest test_app.py'
             }
         }
     }
