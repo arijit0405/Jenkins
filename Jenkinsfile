@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'feature1', url: 'https://github.com/arijit0405/jenkins.git'
+                git branch: 'feature1', url: 'https://github.com/arijit0405/jenkins/tree/feature1/simple_jenkins_pipeline'
             }
         }
 
