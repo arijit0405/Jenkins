@@ -2,22 +2,37 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                git branch: 'feature1', url: 'https://github.com/arijit0405/jenkins/tree/feature1/simple_jenkins_pipeline'
+                checkout scm
             }
         }
 
-        stage('Run App') {
+        stage('Install Python Dependencies') {
             steps {
-                bat 'python app.py'
+                bat 'pip install pytest'
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Application') {
             steps {
-                bat 'pytest test_app.py'
+                bat 'python simple_jenkins_pipeline/app.py'
             }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                bat 'pytest simple_jenkins_pipeline/app_test.py'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build completed successfully!'
+        }
+        failure {
+            echo '❌ Build failed.'
         }
     }
 }
