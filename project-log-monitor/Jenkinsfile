@@ -15,12 +15,11 @@ pipeline {
         stage('Verify File Exists') {
             steps {
                 script {
-                    // Verify if the demolog file exists in the workspace
-                    def fileExists = fileExists 'demolog'
+                    def fileExists = fileExists('project-log-monitor/demo.log')
                     if (!fileExists) {
-                        error "File demolog does not exist in the repository."
+                        error "File demo.log does not exist in the repository."
                     }
-                    echo "File demolog found!"
+                    echo "File demo.log found!"
                 }
             }
         }
@@ -28,32 +27,36 @@ pipeline {
         stage('Run App') {
             steps {
                 dir('project-log-monitor') {
-                  script {
-                    // Run the Python script and capture the output
-                    def result = bat(script: 'python project-log-monitor\\log_parser.py', returnStdout: true).trim()
+                    script {
+                        // Run the Python script and capture the output
+                        def result = bat(script: 'python log_parser.py', returnStdout: true).trim()
+                        echo "Script Output:\n${result}"
 
-                    // Parse the result to get the error count (assuming the script prints it)
-                    def matcher = result =~ /Total errors:\s*(\d+)/
-                    if (matcher) {
-                        ERROR_COUNT = matcher[0][1] // Capture the error count from the output
+                        // Extract error count
+                        def matcher = result =~ /Total 'error' lines found:\s*(\d+)/
+                        if (matcher) {
+                            env.ERROR_COUNT = matcher[0][1]
+                        } else {
+                            echo "Could not parse error count."
+                        }
                     }
                 }
             }
         }
-    }
 
         stage('Run Unit Tests') {
             steps {
-                bat 'python project-log-monitor\\test_log_parser.py'
+                dir('project-log-monitor') {
+                    bat 'python test_log_parser.py'
+                }
             }
         }
 
         stage('Result') {
             steps {
                 script {
-                    // Print the success message and the error count
                     echo "Build Success!"
-                    echo "Total errors found: ${ERROR_COUNT}"
+                    echo "Total errors found: ${env.ERROR_COUNT}"
                 }
             }
         }
@@ -72,7 +75,7 @@ pipeline {
                     curl -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
                     -H "Accept: application/vnd.github+json" ^
                     https://api.github.com/repos/${repo}/pulls ^
-                    -d \"{\\\"title\\\": \\\"${prTitle}\\\", \\\"head\\\": \\\"${featureBranch}\\\", \\\"base\\\": \\\"${mainBranch}\\\", \\\"body\\\": \\\"Automated PR from Jenkins on successful build\\\"}\"
+                    -d "{\\"title\\": \\"${prTitle}\\", \\"head\\": \\"${featureBranch}\\", \\"base\\": \\"${mainBranch}\\", \\"body\\": \\"Automated PR from Jenkins on successful build\\"}"
                     """
                 }
             }
