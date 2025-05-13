@@ -27,19 +27,7 @@ pipeline {
         stage('Run App') {
             steps {
                 dir('project-log-monitor') {
-                    script {
-                        // Run the Python script and capture the output
-                        def result = bat(script: 'python log_parser.py', returnStdout: true).trim()
-                        echo "Script Output:\n${result}"
-
-                        // Extract error count
-                        def matcher = result =~ /Total 'error' lines found:\s*(\d+)/
-                        if (matcher) {
-                            env.ERROR_COUNT = matcher[0][1]
-                        } else {
-                            echo "Could not parse error count."
-                        }
-                    }
+                     bat 'python log_parser.py'
                 }
             }
         }
@@ -48,15 +36,6 @@ pipeline {
             steps {
                 dir('project-log-monitor') {
                     bat 'python test_log_parser.py'
-                }
-            }
-        }
-
-        stage('Result') {
-            steps {
-                script {
-                    echo "Build Success!"
-                    echo "Total errors found: ${env.ERROR_COUNT}"
                 }
             }
         }
