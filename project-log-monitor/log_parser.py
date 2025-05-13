@@ -12,7 +12,7 @@ def count_errors_in_log(file_path):
 
 
 if __name__ == "__main__":
-    log_file = "demo.log"  # Make sure this file exists in the same directory
+    log_file = "project-log-monitor/demo.log"  # Make sure this file exists in the same directory
     error_count = count_errors_in_log(log_file)
     if error_count != -1:
         print(f"Total 'error' lines found: {error_count}")
