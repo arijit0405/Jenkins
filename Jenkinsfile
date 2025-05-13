@@ -10,13 +10,13 @@ pipeline {
 
         stage('Run App') {
             steps {
-                bat 'python simple_jenkins_pipeline/app.py'
+                bat 'python simple_jenkins_pipeline\\app.py'
             }
         }
 
         stage('Run Unit Tests') {
             steps {
-                bat 'python simple_jenkins_pipeline/app_test.py'
+                bat 'python simple_jenkins_pipeline\\app_test.py'
             }
         }
     }
@@ -30,16 +30,11 @@ pipeline {
                     def mainBranch = "main"
                     def prTitle = "Auto PR from ${featureBranch} to ${mainBranch}"
 
-                    sh """
-                    curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-                    -H "Accept: application/vnd.github+json" \
-                    https://api.github.com/repos/${repo}/pulls \
-                    -d '{
-                        "title": "${prTitle}",
-                        "head": "${featureBranch}",
-                        "base": "${mainBranch}",
-                        "body": "Automated PR from Jenkins on successful build"
-                    }'
+                    bat """
+                    curl -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
+                    -H "Accept: application/vnd.github+json" ^
+                    https://api.github.com/repos/${repo}/pulls ^
+                    -d \"{\\\"title\\\": \\\"${prTitle}\\\", \\\"head\\\": \\\"${featureBranch}\\\", \\\"base\\\": \\\"${mainBranch}\\\", \\\"body\\\": \\\"Automated PR from Jenkins on successful build\\\"}\"
                     """
                 }
             }
