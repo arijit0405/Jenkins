@@ -8,13 +8,7 @@ pipeline {
             }
         }
 
-        stage('Install Python Dependencies') {
-            steps {
-                bat 'pip install pytest'
-            }
-        }
-
-        stage('Run Application') {
+        stage('Run App') {
             steps {
                 bat 'python simple_jenkins_pipeline/app.py'
             }
@@ -22,17 +16,33 @@ pipeline {
 
         stage('Run Unit Tests') {
             steps {
-                bat 'pytest simple_jenkins_pipeline/app_test.py'
+                bat 'python simple_jenkins_pipeline/app_test.py'
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build completed successfully!'
-        }
-        failure {
-            echo '❌ Build failed.'
+            script {
+                withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                    def repo = "arijit0405/jenkins"
+                    def featureBranch = "feature1"
+                    def mainBranch = "main"
+                    def prTitle = "Auto PR from ${featureBranch} to ${mainBranch}"
+
+                    sh """
+                    curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+                    -H "Accept: application/vnd.github+json" \
+                    https://api.github.com/repos/${repo}/pulls \
+                    -d '{
+                        "title": "${prTitle}",
+                        "head": "${featureBranch}",
+                        "base": "${mainBranch}",
+                        "body": "Automated PR from Jenkins on successful build"
+                    }'
+                    """
+                }
+            }
         }
     }
 }
