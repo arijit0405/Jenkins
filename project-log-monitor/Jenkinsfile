@@ -1,6 +1,9 @@
-
 pipeline {
     agent any
+
+    environment {
+        ERROR_COUNT = 0  // Default value for error count
+    }
 
     stages {
         stage('Checkout Code') {
@@ -9,15 +12,31 @@ pipeline {
             }
         }
 
+        stage('Verify File Exists') {
+            steps {
+                script {
+                    def fileExists = fileExists('project-log-monitor/demo.log')
+                    if (!fileExists) {
+                        error "File demo.log does not exist in the repository."
+                    }
+                    echo "File demo.log found!"
+                }
+            }
+        }
+
         stage('Run App') {
             steps {
-                bat 'python project-log-monitor\\log_parser.py'
+                dir('project-log-monitor') {
+                     bat 'python log_parser.py'
+                }
             }
         }
 
         stage('Run Unit Tests') {
             steps {
-                bat 'python project-log-monitor\\test_log_parser.py'
+                dir('project-log-monitor') {
+                    bat 'python test_log_parser.py'
+                }
             }
         }
     }
@@ -35,7 +54,7 @@ pipeline {
                     curl -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
                     -H "Accept: application/vnd.github+json" ^
                     https://api.github.com/repos/${repo}/pulls ^
-                    -d \"{\\\"title\\\": \\\"${prTitle}\\\", \\\"head\\\": \\\"${featureBranch}\\\", \\\"base\\\": \\\"${mainBranch}\\\", \\\"body\\\": \\\"Automated PR from Jenkins on successful build\\\"}\"
+                    -d "{\\"title\\": \\"${prTitle}\\", \\"head\\": \\"${featureBranch}\\", \\"base\\": \\"${mainBranch}\\", \\"body\\": \\"Automated PR from Jenkins on successful build\\"}"
                     """
                 }
             }
