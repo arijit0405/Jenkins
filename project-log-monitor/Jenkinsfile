@@ -1,6 +1,9 @@
-
 pipeline {
     agent any
+
+    environment {
+        ERROR_COUNT = 0  // Default value for error count
+    }
 
     stages {
         stage('Checkout Code') {
@@ -11,13 +14,33 @@ pipeline {
 
         stage('Run App') {
             steps {
-                bat 'python project-log-monitor\\log_parser.py'
+                script {
+                    // Run the Python script and capture the output
+                    def result = bat(script: 'python project-log-monitor\\log_parser.py', returnStdout: true).trim()
+                    
+                    // Parse the result to get the error count (assuming the script prints it)
+                    // For example, the script might print something like "Total errors: 5"
+                    def matcher = result =~ /Total errors:\s*(\d+)/
+                    if (matcher) {
+                        ERROR_COUNT = matcher[0][1] // Capture the error count from the output
+                    }
+                }
             }
         }
 
         stage('Run Unit Tests') {
             steps {
                 bat 'python project-log-monitor\\test_log_parser.py'
+            }
+        }
+
+        stage('Result') {
+            steps {
+                script {
+                    // Print the success message and the error count
+                    echo "Build Success!"
+                    echo "Total errors found: ${ERROR_COUNT}"
+                }
             }
         }
     }
