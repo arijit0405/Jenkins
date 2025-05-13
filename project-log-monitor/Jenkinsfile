@@ -12,21 +12,17 @@ pipeline {
             }
         }
 
-        stage('Run App') {
-            steps {
-                script {
-                    // Run the Python script and capture the output
-                    def result = bat(script: 'python project-log-monitor\\log_parser.py', returnStdout: true).trim()
-                    
-                    // Parse the result to get the error count (assuming the script prints it)
-                    // For example, the script might print something like "Total errors: 5"
-                    def matcher = result =~ /Total errors:\s*(\d+)/
-                    if (matcher) {
-                        ERROR_COUNT = matcher[0][1] // Capture the error count from the output
-                    }
-                }
+      stage('Run App') {
+    steps {
+        dir('project-log-monitor') {
+            script {
+                def result = bat(script: 'python log_parser.py', returnStdout: true).trim()
+                echo result
             }
         }
+    }
+}
+
 
         stage('Run Unit Tests') {
             steps {
