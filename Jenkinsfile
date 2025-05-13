@@ -28,7 +28,7 @@ pipeline {
                     def repo = "arijit0405/jenkins"
                     def featureBranch = "feature1"
                     def mainBranch = "main"
-                    def prTitle = "Auto PR from ${featureBranch} to ${mainBranch}"
+                    def prTitle = "Automatic PR from ${featureBranch} to ${mainBranch}"
 
                     bat """
                     curl -X POST -H "Authorization: token %GITHUB_TOKEN%" ^
