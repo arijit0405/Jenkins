@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'arijit2001/my-python-app'
+        TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    bat 'docker build -t %IMAGE_NAME%:%TAG% docker-jenkins-job'
+                }
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        bat """
+                        echo %PASSWORD% | docker login -u %USERNAME% --password-stdin
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                bat 'docker push %IMAGE_NAME%:%TAG%'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Docker image %IMAGE_NAME%:%TAG% pushed successfully!"
+        }
+    }
+}
