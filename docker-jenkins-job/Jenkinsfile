@@ -16,7 +16,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t $IMAGE_NAME:$TAG docker-jenkins-job/'
+                    bat 'docker build -t %IMAGE_NAME%:%TAG% docker-jenkins-job'
                 }
             }
         }
@@ -24,8 +24,10 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        bat """
+                        echo %PASSWORD% | docker login -u %USERNAME% --password-stdin
+                        """
                     }
                 }
             }
@@ -33,14 +35,14 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                sh 'docker push $IMAGE_NAME:$TAG'
+                bat 'docker push %IMAGE_NAME%:%TAG%'
             }
         }
     }
 
     post {
         success {
-            echo "✅ Docker image $IMAGE_NAME:$TAG pushed successfully!"
+            echo "✅ Docker image %IMAGE_NAME%:%TAG% pushed successfully!"
         }
     }
 }
