@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        FRONT_IMAGE = 'arijit2001/mern-front
-end'
+        FRONT_IMAGE = 'arijit2001/mern-frontend'
         BACK_IMAGE = 'arijit2001/mern-backend'
         TAG = "${env.BUILD_NUMBER}"
     }
