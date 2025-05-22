@@ -16,13 +16,13 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                bat "docker build -t %FRONT_IMAGE%:%TAG% ./mern/frontend"
+                bat "docker build -t %FRONT_IMAGE%:%TAG% mern/frontend"
             }
         }
 
         stage('Build Backend') {
             steps {
-                bat "docker build -t %BACK_IMAGE%:%TAG% ./mern/backend"
+                bat "docker build -t %BACK_IMAGE%:%TAG% mern/backend"
             }
         }
 
@@ -30,7 +30,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     bat """
-                        echo | set /p="%PASSWORD%" | docker login -u %USERNAME% --password-stdin
+                        echo %PASSWORD% | docker login -u %USERNAME% --password-stdin
                     """
                 }
             }
@@ -45,18 +45,22 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                bat "set TAG=%TAG% && docker-compose -f mern/docker-compose.yaml down || exit 0"
-                bat "set TAG=%TAG% && docker-compose -f mern/docker-compose.yaml up -d --build"
+                bat """
+                    set TAG=%TAG%
+                    cd mern
+                    docker-compose down || exit 0
+                    docker-compose up -d --build
+                """
             }
         }
     }
 
     post {
         success {
-            echo "🚀 MERN app deployed with Compose!"
+            echo "🚀 MERN app deployed successfully using Docker Compose!"
         }
         failure {
-            echo "❌ Pipeline failed. Check the logs for details."
+            echo "❌ Deployment failed. Please check the Jenkins logs."
         }
     }
 }
