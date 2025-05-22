@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        FRONT_IMAGE = 'yourdockerhubusername/mern-frontend'
+        BACK_IMAGE  = 'yourdockerhubusername/mern-backend'
+        TAG = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                sh 'docker build -t $FRONT_IMAGE:$TAG ./frontend'
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                sh 'docker build -t $BACK_IMAGE:$TAG ./backend'
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                }
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                sh 'docker push $FRONT_IMAGE:$TAG'
+                sh 'docker push $BACK_IMAGE:$TAG'
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                sh 'docker-compose down || true'
+                sh 'docker-compose up -d --build'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "🚀 MERN app deployed with Compose!"
+        }
+    }
+}
