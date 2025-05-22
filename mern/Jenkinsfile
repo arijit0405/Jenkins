@@ -16,13 +16,13 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                bat "docker build -t %FRONT_IMAGE%:%TAG% frontend"
+                bat "docker build -t %FRONT_IMAGE%:%TAG% ./mern/frontend"
             }
         }
 
         stage('Build Backend') {
             steps {
-                bat "docker build -t %BACK_IMAGE%:%TAG% backend"
+                bat "docker build -t %BACK_IMAGE%:%TAG% ./mern/backend"
             }
         }
 
