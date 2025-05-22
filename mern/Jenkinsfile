@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        FRONT_IMAGE = 'arijit2001/mern-frontend'
-        BACK_IMAGE  = 'arijit2001/mern-backend'
+        FRONT_IMAGE = 'arijit2001/mern-front
+end'
+        BACK_IMAGE = 'arijit2001/mern-backend'
         TAG = "${env.BUILD_NUMBER}"
     }
 
@@ -16,21 +17,21 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                bat 'docker build -t $FRONT_IMAGE:$TAG ./frontend'
+                bat "docker build -t %FRONT_IMAGE%:%TAG% ./frontend"
             }
         }
 
         stage('Build Backend') {
             steps {
-                bat 'docker build -t $BACK_IMAGE:$TAG ./backend'
+                bat "docker build -t %BACK_IMAGE%:%TAG% ./backend"
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                   bat """
-                    echo %PASSWORD% | docker login -u %USERNAME% --password-stdin
+                    bat """
+                        echo | set /p="%PASSWORD%" | docker login -u %USERNAME% --password-stdin
                     """
                 }
             }
@@ -38,15 +39,15 @@ pipeline {
 
         stage('Push Images') {
             steps {
-                bat 'docker push $FRONT_IMAGE:$TAG'
-                bat 'docker push $BACK_IMAGE:$TAG'
+                bat "docker push %FRONT_IMAGE%:%TAG%"
+                bat "docker push %BACK_IMAGE%:%TAG%"
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
-                bat 'docker-compose down || true'
-                bat 'docker-compose up -d --build'
+                bat "docker-compose down || exit 0"
+                bat "docker-compose up -d --build"
             }
         }
     }
@@ -54,6 +55,9 @@ pipeline {
     post {
         success {
             echo "🚀 MERN app deployed with Compose!"
+        }
+        failure {
+            echo "❌ Pipeline failed. Check the logs for details."
         }
     }
 }
