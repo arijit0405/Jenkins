@@ -45,8 +45,8 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                bat "docker-compose down || exit 0"
-                bat "docker-compose up -d --build"
+                bat "docker-compose -f mern/docker-compose.yaml down || exit 0"
+                bat "docker-compose -f mern/docker-compose.yaml up -d --build"
             }
         }
     }
