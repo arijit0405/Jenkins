@@ -16,13 +16,13 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                bat "docker build -t %FRONT_IMAGE%:%TAG% frontend"
+               bat "docker build -t %FRONT_IMAGE%:%TAG% ./mern/frontend"
             }
         }
 
         stage('Build Backend') {
             steps {
-                bat "docker build -t %BACK_IMAGE%:%TAG% backend"
+                bat "docker build -t %BACK_IMAGE%:%TAG% ./mern/backend"
             }
         }
 
@@ -45,12 +45,8 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             steps {
-                bat """
-                    set TAG=%TAG%
-                    cd mern
-                    docker-compose down || exit 0
-                    docker-compose up -d --build
-                """
+              bat "set TAG=%TAG% && docker-compose -f ./mern/docker-compose.yaml down || exit 0"
+              bat "set TAG=%TAG% && docker-compose -f ./mern/docker-compose.yaml up -d --build"
             }
         }
     }
