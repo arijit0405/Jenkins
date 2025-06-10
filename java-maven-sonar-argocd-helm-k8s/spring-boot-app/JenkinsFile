@@ -2,8 +2,8 @@ pipeline {
     agent {
         docker {
             image 'abhishekf5/maven-abhishek-docker-agent:v1'
-            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-            customWorkspace '/workspace' // Override Jenkins' default workspace mapping
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock -v "${WORKSPACE}:/workspace" -w /workspace --entrypoint /bin/sh'
+            // Remove customWorkspace since it’s not fully overriding the default behavior
         }
     }
 
