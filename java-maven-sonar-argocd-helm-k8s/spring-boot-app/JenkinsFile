@@ -9,8 +9,8 @@ pipeline {
   environment {
     SONAR_URL = "http://host.docker.internal:9000"
     DOCKER_IMAGE = "arijit2001/spring-boot-app:${BUILD_NUMBER}"
-    GIT_REPO_NAME = "your-repo-name"
-    GIT_USER_NAME = "your-github-username"
+    GIT_REPO_NAME = "https://github.com/arijit0405/jenkins"
+    GIT_USER_NAME = "arijit0405"
   }
 
   stages {
@@ -48,10 +48,10 @@ pipeline {
 
     stage('Update Deployment File') {
       steps {
-        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
           bat """
-            git config user.email "youremail@example.com"
-            git config user.name "Your Name"
+            git config user.email "arijitchakraborty691@gmail.com"
+            git config user.name "Arijit"
             sed -i "s/replaceImageTag/%BUILD_NUMBER%/g" java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml
             git add java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml
             git commit -m "Update deployment image to version %BUILD_NUMBER%"
