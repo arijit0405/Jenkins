@@ -1,12 +1,12 @@
 pipeline {
-    agent any // Run on any available Jenkins node (not a Docker container)
+    agent any
 
     environment {
-        SONAR_URL = "http://localhost:9000" // Changed to localhost since we're not in a container
+        SONAR_URL = "http://localhost:9000"
         DOCKER_IMAGE = "arijit2001/spring-boot-app:${BUILD_NUMBER}"
         GIT_REPO_NAME = "jenkins"
         GIT_USER_NAME = "arijit0405"
-        PROJECT_DIR = "java-maven-sonar-argocd-helm-k8s\\spring-boot-app" // Use Windows path separators
+        PROJECT_DIR = "java-maven-sonar-argocd-helm-k8s\\spring-boot-app"
     }
 
     stages {
@@ -44,15 +44,22 @@ pipeline {
             }
         }
 
+        stage('Debug Deployment File Before Update') {
+            steps {
+                bat "if exist java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml (type java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml) else (echo File not found)"
+            }
+        }
+
         stage('Update Deployment File') {
             steps {
                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                     bat """
                         git config user.email "arijitchakraborty691@gmail.com"
                         git config user.name "Arijit"
-                        sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml
+                        powershell -Command "(Get-Content java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml).Replace('replaceImageTag', '${BUILD_NUMBER}') | Set-Content java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml"
+                        type java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml
                         git add java-maven-sonar-argocd-helm-k8s\\spring-boot-app-manifests\\deployment.yml
-                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                        git commit -m "Update deployment image to version ${BUILD_NUMBER}" || echo "Nothing to commit"
                         git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
                     """
                 }
