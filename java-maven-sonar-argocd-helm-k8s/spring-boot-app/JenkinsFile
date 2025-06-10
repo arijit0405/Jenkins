@@ -8,7 +8,7 @@ pipeline {
 
   environment {
     SONAR_URL = "http://host.docker.internal:9000"
-    DOCKER_IMAGE = "arijit2001/ultimate-cicd:${BUILD_NUMBER}"
+    DOCKER_IMAGE = "arijit2001/spring-boot-app:${BUILD_NUMBER}"
     GIT_REPO_NAME = "your-repo-name"
     GIT_USER_NAME = "your-github-username"
   }
