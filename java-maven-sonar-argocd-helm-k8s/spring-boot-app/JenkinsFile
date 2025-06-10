@@ -1,17 +1,18 @@
 pipeline {
     agent {
         docker {
-            image 'abhishekf5/maven-abhishek-docker-agent:v1' // Use an image with Maven, Docker, and Git
-            args '--user root -v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}:/workspace -w /workspace'
+            image 'abhishekf5/maven-abhishek-docker-agent:v1'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+            customWorkspace '/workspace' // Override Jenkins' default workspace mapping
         }
     }
 
     environment {
         SONAR_URL = "http://host.docker.internal:9000"
         DOCKER_IMAGE = "arijit2001/spring-boot-app:${BUILD_NUMBER}"
-        GIT_REPO_NAME = "jenkins" // Just the repo name, not the full URL
+        GIT_REPO_NAME = "jenkins"
         GIT_USER_NAME = "arijit0405"
-        PROJECT_DIR = "java-maven-sonar-argocd-helm-k8s/spring-boot-app" // Define project directory for reuse
+        PROJECT_DIR = "java-maven-sonar-argocd-helm-k8s/spring-boot-app"
     }
 
     stages {
